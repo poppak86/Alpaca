@@ -29,4 +29,6 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas requests
+   ```
+2. Set environment variables `ALPACA_API_KEY`, `ALPACA_SECRET_KEY` and `NEWS_API_KEY` with your credentials.
