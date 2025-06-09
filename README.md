@@ -30,3 +30,12 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+   ```
+
+### Simulate Historical Trades
+
+After you have a `trade_log.csv` file, analyze skipped trades with:
+
+```bash
+python bot.py simulate
+```
