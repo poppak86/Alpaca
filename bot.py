@@ -12,6 +12,42 @@ API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
 
+def analyze_trade_log():
+    """Analyze the trade_log.csv file and print a summary per strategy."""
+    log_file = "trade_log.csv"
+    if not os.path.exists(log_file):
+        print("trade_log.csv not found.")
+        return
+
+    strategies = {}
+    with open(log_file, newline="") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if len(row) < 5:
+                continue
+            _, _symbol, price, action, strategy = row
+            price = float(price)
+            info = strategies.setdefault(
+                strategy, {"total": 0, "executed": 0, "skipped": 0, "prices": []}
+            )
+            info["total"] += 1
+            if action == "buy":
+                info["executed"] += 1
+                info["prices"].append(price)
+            else:
+                info["skipped"] += 1
+
+    for strategy, data in strategies.items():
+        avg_price = (
+            sum(data["prices"]) / len(data["prices"]) if data["prices"] else 0
+        )
+        print(f"Strategy: {strategy}")
+        print(f"- Trades: {data['total']}")
+        print(f"- Executed: {data['executed']}")
+        print(f"- Skipped: {data['skipped']}")
+        print(f"- Avg Buy Price: ${avg_price:.2f}")
+
+
 def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
     """Trade any stock and log the decision, price, time, and logic used."""
     if not API_KEY or not SECRET_KEY:
