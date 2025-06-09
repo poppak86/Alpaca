@@ -30,3 +30,9 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+   ```
+
+2. Evolve strategies based on the trade log:
+   ```bash
+   python -c "import bot; bot.evolve_strategy()"
+   ```

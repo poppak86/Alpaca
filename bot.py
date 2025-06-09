@@ -2,6 +2,7 @@
 
 import os
 import csv
+import json
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
@@ -55,6 +56,49 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             "buy" if response else "skipped",
             strategy_used
         ])
+
+def evolve_strategy(trade_log_path: str = "trade_log.csv", priorities_path: str = "strategy_priority.json") -> None:
+    """Analyze trade history and raise priority for winning strategies."""
+    if not os.path.exists(trade_log_path):
+        print("Trade log not found.")
+        return
+
+    # Load existing priorities
+    if os.path.exists(priorities_path):
+        try:
+            with open(priorities_path) as f:
+                priorities = json.load(f)
+        except Exception:
+            priorities = {}
+    else:
+        priorities = {}
+
+    stats: dict[str, dict[str, int]] = {}
+    with open(trade_log_path, newline="") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if len(row) < 5:
+                continue
+            strategy = row[4]
+            result = row[3].lower()
+            if strategy not in stats:
+                stats[strategy] = {"wins": 0, "total": 0}
+            stats[strategy]["total"] += 1
+            if result == "win":
+                stats[strategy]["wins"] += 1
+
+    for strategy, s in stats.items():
+        if s["total"] == 0:
+            continue
+        win_rate = s["wins"] / s["total"]
+        if win_rate > 0.7:
+            priorities[strategy] = priorities.get(strategy, 0) + 1
+
+    with open(priorities_path, "w") as f:
+        json.dump(priorities, f, indent=2)
+
+    for strategy, value in priorities.items():
+        print(f"Strategy '{strategy}' priority: {value}")
 
 if __name__ == "__main__":
     trade_and_log("AAPL", "price_under_500")
