@@ -6,11 +6,15 @@ from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
 
+from brain import Brain
+
 load_dotenv()
 
 API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
+
+brain = Brain()
 
 def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
     """Trade any stock and log the decision, price, time, and logic used."""
@@ -44,6 +48,16 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             print(f"Order failed: {e}")
     else:
         print("Price too high. No order placed.")
+
+    profit = 0.0
+    if response:
+        try:
+            latest_after = api.get_latest_trade(symbol)
+            after_price = float(latest_after.price)
+            profit = after_price - price
+        except Exception as e:
+            print(f"Failed to fetch post-trade price for {symbol}: {e}")
+    brain.compare_advice_with_trade(strategy_used, "buy", profit)
 
     # Log everything for future learning
     with open("trade_log.csv", "a", newline="") as f:
