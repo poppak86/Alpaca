@@ -29,4 +29,11 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas openai
+   ```
+2. Create a `.env` file with your API keys:
+   ```bash
+   ALPACA_API_KEY=your_alpaca_key
+   ALPACA_SECRET_KEY=your_alpaca_secret
+   OPENAI_API_KEY=your_openai_key
+   ```

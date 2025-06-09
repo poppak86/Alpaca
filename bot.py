@@ -5,12 +5,42 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import openai
 
 load_dotenv()
 
 API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+def summarize_sentiment(headline: str) -> str:
+    """Rate a news headline as positive, negative, or neutral for the market."""
+    if not openai.api_key:
+        raise ValueError("OPENAI_API_KEY not configured")
+
+    prompt = (
+        "Is the following news headline positive, negative, or neutral for the stock market? "
+        "Respond with only one word: positive, negative, or neutral.\n"
+        f"Headline: {headline}"
+    )
+
+    try:
+        resp = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1,
+            temperature=0,
+        )
+        sentiment = resp.choices[0].message.content.strip().lower()
+    except Exception as e:
+        print(f"OpenAI API request failed: {e}")
+        return "neutral"
+
+    if sentiment not in {"positive", "negative", "neutral"}:
+        return "neutral"
+    return sentiment
 
 def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
     """Trade any stock and log the decision, price, time, and logic used."""
