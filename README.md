@@ -29,4 +29,11 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas yfinance
+```
+
+2. Compare strategies on historical data:
+   ```python
+   from bot import compare_strategies
+   compare_strategies("AAPL", [150, 170])
+   ```
