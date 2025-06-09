@@ -30,3 +30,9 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+   ```
+
+2. Run the bot in continuous mode:
+   ```bash
+   python bot.py
+   ```
