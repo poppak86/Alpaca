@@ -24,9 +24,16 @@ This bot will:
 - Trade any stock
 - Log detailed trade data to CSV
 - Begin self-analysis loop on trade outcomes
+- Check recent news with `news_risk_filter()` for GPT-powered risk scoring
 
 ## 🛠 Setup
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas requests openai
+   ```
+
+2. Set environment variables for your API keys:
+   - `ALPACA_API_KEY` and `ALPACA_SECRET_KEY`
+   - `NEWS_API_KEY` for [NewsAPI](https://newsapi.org)
+   - `OPENAI_API_KEY` for OpenAI
