@@ -5,12 +5,32 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import requests
 
 load_dotenv()
 
 API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
+NEWS_API_KEY = os.getenv("NEWS_API_KEY")
+
+
+def fetch_top_headlines(country: str = "us", limit: int = 3):
+    """Return a list of top news headlines."""
+    if not NEWS_API_KEY:
+        print("Missing NEWS_API_KEY; skipping headlines fetch.")
+        return []
+
+    url = "https://newsapi.org/v2/top-headlines"
+    params = {"country": country, "apiKey": NEWS_API_KEY}
+    try:
+        resp = requests.get(url, params=params, timeout=5)
+        resp.raise_for_status()
+        articles = resp.json().get("articles", [])
+        return [a.get("title") for a in articles][:limit]
+    except Exception as exc:
+        print(f"Failed to fetch headlines: {exc}")
+        return []
 
 def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
     """Trade any stock and log the decision, price, time, and logic used."""
@@ -20,6 +40,12 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
 
     api = tradeapi.REST(API_KEY, SECRET_KEY, base_url=BASE_URL)
     print(f"Watching {symbol.upper()}...")
+
+    headlines = fetch_top_headlines()
+    if headlines:
+        print("Top headlines:")
+        for hl in headlines:
+            print(f"- {hl}")
 
     try:
         latest_trade = api.get_latest_trade(symbol)
@@ -53,7 +79,8 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             symbol,
             price,
             "buy" if response else "skipped",
-            strategy_used
+            strategy_used,
+            " | ".join(headlines)
         ])
 
 if __name__ == "__main__":
