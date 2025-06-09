@@ -5,6 +5,8 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import pandas as pd
+import matplotlib.pyplot as plt
 
 load_dotenv()
 
@@ -55,6 +57,53 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             "buy" if response else "skipped",
             strategy_used
         ])
+
+
+def simulate_historical_trades(symbol: str, start: str, end: str) -> None:
+    """Simulate a simple moving average strategy on historical data and plot results."""
+    if not API_KEY or not SECRET_KEY:
+        print("Missing Alpaca credentials.")
+        return
+
+    api = tradeapi.REST(API_KEY, SECRET_KEY, base_url=BASE_URL)
+
+    try:
+        bars = api.get_bars(symbol, tradeapi.rest.TimeFrame.Day, start, end).df
+    except Exception as e:
+        print(f"Failed to fetch historical data: {e}")
+        return
+
+    if bars.empty:
+        print("No historical data returned.")
+        return
+
+    bars.index = pd.to_datetime(bars.index)
+    bars.sort_index(inplace=True)
+    bars['SMA50'] = bars['close'].rolling(window=50).mean()
+
+    buy_signals = []
+    prev_close = bars['close'].iloc[0]
+    prev_sma = bars['SMA50'].iloc[0]
+    for idx in range(1, len(bars)):
+        close = bars['close'].iloc[idx]
+        sma = bars['SMA50'].iloc[idx]
+        if pd.notna(prev_sma) and prev_close < prev_sma and close > sma:
+            buy_signals.append((bars.index[idx], close))
+        prev_close = close
+        prev_sma = sma
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(bars.index, bars['close'], label='Close Price')
+    plt.plot(bars.index, bars['SMA50'], label='50 SMA', linestyle='--')
+    if buy_signals:
+        dates, prices = zip(*buy_signals)
+        plt.scatter(dates, prices, color='green', marker='^', label='Buy Signal')
+    plt.title(f'{symbol} Price History with Buy Points')
+    plt.xlabel('Date')
+    plt.ylabel('Price ($)')
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     trade_and_log("AAPL", "price_under_500")
