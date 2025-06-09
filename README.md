@@ -29,4 +29,10 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas matplotlib
+   ```
+
+2. Plot trades for a strategy:
+   ```bash
+   python plot_trades.py <strategy_name>
+   ```
