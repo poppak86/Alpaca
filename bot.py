@@ -3,8 +3,12 @@
 import os
 import csv
 from datetime import datetime
+from typing import List, Dict
+
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import pandas as pd
+import yfinance as yf
 
 load_dotenv()
 
@@ -55,6 +59,41 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             "buy" if response else "skipped",
             strategy_used
         ])
+
+
+def simulate_historical_trades(symbol: str, price_threshold: float, days: int = 60) -> Dict[str, float]:
+    """Backtest a simple threshold strategy using Yahoo Finance data."""
+    data = yf.download(symbol, period=f"{days}d", interval="1d", progress=False)
+    if data.empty or len(data) < 2:
+        return {"threshold": price_threshold, "win_rate": 0.0, "trades": 0}
+    if isinstance(data.columns, pd.MultiIndex):
+        data = data.xs(symbol, level=1, axis=1)
+
+    wins = 0
+    trades = 0
+    closes = data["Close"].tolist()
+    opens = data["Open"].tolist()
+
+    for i in range(len(data) - 1):
+        if closes[i] < price_threshold:
+            entry = opens[i + 1]
+            exit_price = closes[i + 1]
+            trades += 1
+            if exit_price > entry:
+                wins += 1
+
+    win_rate = wins / trades if trades else 0.0
+    return {"threshold": price_threshold, "win_rate": round(win_rate, 2), "trades": trades}
+
+
+def compare_strategies(symbol: str, thresholds: List[float]) -> List[Dict[str, float]]:
+    """Simulate several strategies and print a comparison table."""
+    results = [simulate_historical_trades(symbol, t) for t in thresholds]
+    print(f"Results for {symbol}:")
+    print("Threshold  Win Rate  Trades")
+    for res in results:
+        print(f"{res['threshold']:>9}  {res['win_rate']:.2f}      {res['trades']}")
+    return results
 
 if __name__ == "__main__":
     trade_and_log("AAPL", "price_under_500")
