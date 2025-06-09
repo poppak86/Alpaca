@@ -23,6 +23,7 @@ This bot will:
 - Connect to Alpaca Paper API
 - Trade any stock
 - Log detailed trade data to CSV
+- Track recent trade timestamps to avoid over-trading a symbol
 - Begin self-analysis loop on trade outcomes
 
 ## 🛠 Setup
