@@ -5,6 +5,8 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import pandas as pd
+import matplotlib.pyplot as plt
 
 load_dotenv()
 
@@ -55,6 +57,38 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             "buy" if response else "skipped",
             strategy_used
         ])
+
+
+def simulate_historical_trades(symbol: str, strategy_name: str) -> None:
+    """Plot historical trades filtered by symbol and strategy."""
+    log_file = "trade_log.csv"
+    if not os.path.exists(log_file):
+        print("No trade log found.")
+        return
+
+    df = pd.read_csv(
+        log_file,
+        header=None,
+        names=["timestamp", "symbol", "price", "action", "strategy"],
+    )
+
+    df = df[(df["symbol"] == symbol) & (df["strategy"] == strategy_name)]
+    if df.empty:
+        print(f"No trades found for {symbol} using {strategy_name}.")
+        return
+
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df.sort_values("timestamp", inplace=True)
+
+    df["portfolio_value"] = (df["action"] == "buy").cumsum() * df["price"]
+
+    plt.figure()
+    plt.plot(df["timestamp"], df["portfolio_value"])
+    plt.xlabel("Time")
+    plt.ylabel("Simulated Value")
+    plt.title(f"Historical Trades - {strategy_name} - {symbol}")
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     trade_and_log("AAPL", "price_under_500")
