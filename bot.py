@@ -4,13 +4,45 @@ import os
 import csv
 from datetime import datetime
 from dotenv import load_dotenv
+import requests
+from textblob import TextBlob
 import alpaca_trade_api as tradeapi
 
 load_dotenv()
 
+NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
+
+def get_headlines(symbol: str, limit: int = 5):
+    """Fetch latest news headlines for the symbol and tag them with sentiment."""
+    if not NEWS_API_KEY:
+        print("Missing NEWS_API_KEY.")
+        return []
+    url = (
+        "https://newsapi.org/v2/everything"
+        f"?q={symbol}&sortBy=publishedAt&language=en&pageSize={limit}&apiKey={NEWS_API_KEY}"
+    )
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        print(f"Failed to fetch news: {e}")
+        return []
+    headlines = []
+    for article in data.get("articles", []):
+        headline = article.get("title", "")
+        polarity = TextBlob(headline).sentiment.polarity
+        if polarity > 0.1:
+            sentiment = "positive"
+        elif polarity < -0.1:
+            sentiment = "negative"
+        else:
+            sentiment = "neutral"
+        headlines.append({"headline": headline, "sentiment": sentiment})
+    return headlines
 
 def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
     """Trade any stock and log the decision, price, time, and logic used."""
