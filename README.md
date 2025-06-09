@@ -24,9 +24,16 @@ This bot will:
 - Trade any stock
 - Log detailed trade data to CSV
 - Begin self-analysis loop on trade outcomes
+- Generate a GPT-based daily performance summary
 
 ## 🛠 Setup
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas openai
+   ```
+
+## 📊 Daily Reports
+
+Call `generate_daily_summary()` after the market closes to append a row to
+`daily_summary.csv` with the day's performance metrics and a short GPT summary.
