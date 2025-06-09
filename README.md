@@ -30,3 +30,16 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+   ```
+
+## 📊 Simulating Historical Trades
+
+Use `simulate_historical_trades` to fetch past bars and apply the
+`price_under_500` rule:
+
+```python
+from bot import simulate_historical_trades
+
+trades = simulate_historical_trades("AAPL", "2023-01-01", "2023-01-31")
+print(trades)
+```
