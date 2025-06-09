@@ -5,6 +5,8 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import pandas as pd
+import matplotlib.pyplot as plt
 
 load_dotenv()
 
@@ -56,5 +58,50 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             strategy_used
         ])
 
+
+def simulate_historical_trades(log_file: str = "trade_log.csv") -> None:
+    """Visualize historical trades marking skipped trades in a different color."""
+
+    if not os.path.exists(log_file):
+        print(f"{log_file} not found.")
+        return
+
+    df = pd.read_csv(
+        log_file,
+        header=None,
+        names=["timestamp", "symbol", "price", "action", "strategy"],
+    )
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+    executed = df[df["action"] != "skipped"]
+    skipped = df[df["action"] == "skipped"]
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(df["timestamp"], df["price"], label="Price", color="grey", alpha=0.3)
+
+    if not executed.empty:
+        plt.scatter(
+            executed["timestamp"],
+            executed["price"],
+            color="green",
+            label="Executed",
+        )
+
+    if not skipped.empty:
+        plt.scatter(
+            skipped["timestamp"],
+            skipped["price"],
+            color="orange",
+            label="Skipped",
+        )
+
+    plt.xlabel("Time")
+    plt.ylabel("Price")
+    plt.title("Historical Trades")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
 if __name__ == "__main__":
     trade_and_log("AAPL", "price_under_500")
+    simulate_historical_trades()
