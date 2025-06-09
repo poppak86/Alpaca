@@ -30,3 +30,12 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+   ```
+
+2. (Optional) Create a strategy priority file which maps strategy names to
+   numeric priority scores:
+   ```python
+   from bot import save_strategy_priorities
+   save_strategy_priorities({"price_under_500": 1.0})
+   ```
+   The bot automatically loads this file on startup.
