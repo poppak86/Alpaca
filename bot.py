@@ -5,12 +5,14 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import requests
 
 load_dotenv()
 
 API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
+NEWS_API_KEY = os.getenv("NEWSAPI_KEY")
 
 def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
     """Trade any stock and log the decision, price, time, and logic used."""
@@ -56,5 +58,41 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             strategy_used
         ])
 
+
+def get_headlines():
+    """Fetch top stock market news from NewsAPI and log timestamp + headline."""
+    if not NEWS_API_KEY:
+        print("Missing NewsAPI key.")
+        return
+
+    url = "https://newsapi.org/v2/top-headlines"
+    params = {
+        "q": "stock market",
+        "language": "en",
+        "apiKey": NEWS_API_KEY,
+        "pageSize": 5,
+    }
+
+    try:
+        resp = requests.get(url, params=params, timeout=10)
+        resp.raise_for_status()
+        news = resp.json()
+    except Exception as e:
+        print(f"Failed to fetch news: {e}")
+        return
+
+    articles = news.get("articles", [])
+    if not articles:
+        print("No news articles found.")
+        return
+
+    with open("news_log.csv", "a", newline="") as f:
+        writer = csv.writer(f)
+        for article in articles:
+            headline = article.get("title")
+            if headline:
+                writer.writerow([datetime.utcnow().isoformat(), headline])
+
 if __name__ == "__main__":
     trade_and_log("AAPL", "price_under_500")
+    get_headlines()
