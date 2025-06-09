@@ -2,9 +2,12 @@
 
 import os
 import csv
+import json
 from datetime import datetime
+from typing import List, Dict
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import openai
 
 load_dotenv()
 
@@ -56,5 +59,68 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             strategy_used
         ])
 
+
+def _summarize_performance(csv_file: str) -> str:
+    """Create a short summary of recent performance from the log."""
+    if not os.path.exists(csv_file):
+        return "No performance data available."
+    try:
+        with open(csv_file, "r") as f:
+            lines = f.readlines()[-10:]
+        return "\n".join(line.strip() for line in lines)
+    except Exception as e:
+        return f"Failed to read performance data: {e}"
+
+
+def generate_strategy_with_gpt(performance_csv: str = "trade_log.csv",
+                               output_file: str = "proposed_strategies.json") -> Dict[str, str]:
+    """Use GPT to propose a new trading strategy based on performance data."""
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError("Missing OPENAI_API_KEY environment variable")
+
+    openai.api_key = openai_api_key
+
+    summary = _summarize_performance(performance_csv)
+    prompt = (
+        "You are a trading strategy generator. "
+        "Based on the following recent performance data, propose a new trading "
+        "strategy in a short JSON description.\n\n" + summary
+    )
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+    )
+
+    strategy_text = response.choices[0].message.content.strip()
+
+    new_entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "strategy": strategy_text,
+    }
+
+    strategies: List[Dict[str, str]] = []
+    if os.path.exists(output_file):
+        try:
+            with open(output_file, "r") as f:
+                strategies = json.load(f)
+        except Exception:
+            strategies = []
+
+    strategies.append(new_entry)
+
+    with open(output_file, "w") as f:
+        json.dump(strategies, f, indent=2)
+
+    return new_entry
+
 if __name__ == "__main__":
     trade_and_log("AAPL", "price_under_500")
+    try:
+        result = generate_strategy_with_gpt()
+        print("Proposed new strategy:")
+        print(result["strategy"])
+    except Exception as e:
+        print(f"Strategy generation failed: {e}")
