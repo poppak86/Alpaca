@@ -29,4 +29,13 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas requests
+   ```
+
+## 📊 Strategy Tracking
+
+The bot now records the profit or loss from every trade in `trade_log.csv` and
+aggregates statistics per strategy in `strategy_stats.csv`. When a strategy's
+win rate falls below **40%** after 10 trades it is automatically marked as
+inactive and a Telegram message is sent (configure `TELEGRAM_BOT_TOKEN` and
+`TELEGRAM_CHAT_ID` in your `.env` file).
