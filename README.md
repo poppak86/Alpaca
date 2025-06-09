@@ -30,3 +30,11 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+   ```
+2. Create a `.env` file with your Alpaca and Telegram credentials:
+   ```bash
+   ALPACA_API_KEY=your_key
+   ALPACA_SECRET_KEY=your_secret
+   TELEGRAM_BOT_TOKEN=your_bot_token
+   TELEGRAM_CHAT_ID=your_chat_id
+   ```
