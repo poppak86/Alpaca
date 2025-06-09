@@ -30,3 +30,12 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+   ```
+
+2. Set your Alpaca API keys in a `.env` file.
+
+## 📉 Cooldown Mode
+
+The bot automatically switches to paper trading after **3 failed live trades**.
+While in paper mode it needs **2 profitable trades** within an hour to return to
+live trading. Each transition is recorded in `mode_log.csv`.
