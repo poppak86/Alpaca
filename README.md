@@ -30,3 +30,8 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+   ```
+
+2. The bot tracks its cash in `account_balance.json`. The file is created
+   automatically with a `$700` starting balance. Cash from sales is held in
+   a pending settlement account until the next trading day.
