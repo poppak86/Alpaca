@@ -24,6 +24,7 @@ This bot will:
 - Trade any stock
 - Log detailed trade data to CSV
 - Begin self-analysis loop on trade outcomes
+- Send a daily Telegram summary of trades
 
 ## 🛠 Setup
 
