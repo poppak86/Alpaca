@@ -29,4 +29,12 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas openai requests
+   ```
+2. Set environment variables for Alpaca, OpenAI and news access:
+   - `ALPACA_API_KEY` and `ALPACA_SECRET_KEY`
+   - `OPENAI_API_KEY`
+   - `NEWS_API_KEY` (optional)
+
+After each trade the bot fetches recent headlines for the symbol and asks GPT to summarize
+why the trade worked or didn't work based on those headlines and the strategy used.
