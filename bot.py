@@ -5,6 +5,7 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+from econ_calendar import is_blocked_now, update_blocklist
 
 load_dotenv()
 
@@ -20,6 +21,11 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
 
     api = tradeapi.REST(API_KEY, SECRET_KEY, base_url=BASE_URL)
     print(f"Watching {symbol.upper()}...")
+
+    blocked, event = is_blocked_now()
+    if blocked:
+        print(f"Trading blocked due to economic event: {event}")
+        return
 
     try:
         latest_trade = api.get_latest_trade(symbol)
@@ -57,4 +63,6 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
         ])
 
 if __name__ == "__main__":
+    # update blocklist first
+    update_blocklist()
     trade_and_log("AAPL", "price_under_500")
