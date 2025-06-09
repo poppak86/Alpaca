@@ -5,6 +5,9 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import pandas as pd
+from colorama import Fore, Style, init
+import sys
 
 load_dotenv()
 
@@ -56,5 +59,32 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             strategy_used
         ])
 
+
+def simulate_historical_trades(filename: str = "trade_log.csv", spike_threshold: float = 0.05) -> None:
+    """Print the trade log highlighting skipped trades that later spiked in price."""
+    init(autoreset=True)
+
+    if not os.path.exists(filename):
+        print(f"{filename} not found.")
+        return
+
+    df = pd.read_csv(
+        filename,
+        header=None,
+        names=["timestamp", "symbol", "price", "action", "strategy"],
+    )
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+    for idx, row in df.iterrows():
+        output = f"{row.timestamp} {row.symbol} ${row.price:.2f} {row.action} {row.strategy}"
+        if row.action == "skipped":
+            later = df[(df.symbol == row.symbol) & (df.timestamp > row.timestamp)]
+            if not later.empty and later.price.max() >= row.price * (1 + spike_threshold):
+                output = f"{Fore.RED}{output}{Style.RESET_ALL}"
+        print(output)
+
 if __name__ == "__main__":
-    trade_and_log("AAPL", "price_under_500")
+    if len(sys.argv) > 1 and sys.argv[1] == "simulate":
+        simulate_historical_trades()
+    else:
+        trade_and_log("AAPL", "price_under_500")
