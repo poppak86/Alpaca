@@ -29,4 +29,10 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas textblob requests
+   ```
+2. (Optional) download TextBlob corpora:
+   ```bash
+   python -m textblob.download_corpora
+   ```
+3. Set your API keys in a `.env` file.
