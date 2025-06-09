@@ -24,6 +24,7 @@ This bot will:
 - Trade any stock
 - Log detailed trade data to CSV
 - Begin self-analysis loop on trade outcomes
+- Mutate strategies to test new price thresholds
 
 ## 🛠 Setup
 

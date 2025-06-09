@@ -2,6 +2,8 @@
 
 import os
 import csv
+from dataclasses import dataclass
+import random
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
@@ -12,8 +14,28 @@ API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
 
-def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
-    """Trade any stock and log the decision, price, time, and logic used."""
+@dataclass
+class PriceUnderStrategy:
+    """Simple strategy that buys when the price is below a threshold."""
+    threshold: float
+
+    def __call__(self, price: float) -> bool:
+        return price < self.threshold
+
+
+def mutate_strategy(strategy: PriceUnderStrategy, change: float = 0.02) -> PriceUnderStrategy:
+    """Return a new strategy with its threshold slightly mutated.
+
+    Args:
+        strategy: The strategy instance to mutate.
+        change: Maximum percentage change to apply (e.g. 0.02 is ±2%).
+    """
+    delta = strategy.threshold * change * random.uniform(-1, 1)
+    new_threshold = strategy.threshold + delta
+    return PriceUnderStrategy(threshold=new_threshold)
+
+def trade_and_log(symbol: str, strategy: PriceUnderStrategy):
+    """Trade any stock using the given strategy and log the decision."""
     if not API_KEY or not SECRET_KEY:
         print("Missing Alpaca credentials.")
         return
@@ -30,7 +52,7 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
         return
 
     response = None
-    if price < 500:  # Placeholder logic
+    if strategy(price):
         try:
             response = api.submit_order(
                 symbol=symbol,
@@ -53,8 +75,10 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             symbol,
             price,
             "buy" if response else "skipped",
-            strategy_used
+            f"price_under_{strategy.threshold:.2f}"
         ])
 
 if __name__ == "__main__":
-    trade_and_log("AAPL", "price_under_500")
+    base = PriceUnderStrategy(500)
+    test_strategy = mutate_strategy(base)
+    trade_and_log("AAPL", test_strategy)
