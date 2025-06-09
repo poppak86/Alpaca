@@ -3,8 +3,11 @@
 import os
 import csv
 from datetime import datetime
+from typing import List
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+
+from brains import CheapStockBrain, RandomBrain, Decision
 
 load_dotenv()
 
@@ -29,8 +32,20 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
         print(f"Failed to fetch price for {symbol}: {e}")
         return
 
+    # Evaluate brains
+    brains = [CheapStockBrain(), RandomBrain()]
+    timestamp = datetime.utcnow().isoformat()
+    votes: List[Decision] = []
+    for brain in brains:
+        decision = brain.decide(symbol, price)
+        votes.append(decision)
+        print(f"{brain.name} voted {decision.vote}: {decision.reason}")
+
+    buy_votes = sum(1 for v in votes if v.vote == "buy")
+    final_decision = "buy" if buy_votes > len(votes) / 2 else "skip"
+
     response = None
-    if price < 500:  # Placeholder logic
+    if final_decision == "buy":
         try:
             response = api.submit_order(
                 symbol=symbol,
@@ -43,13 +58,25 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
         except Exception as e:
             print(f"Order failed: {e}")
     else:
-        print("Price too high. No order placed.")
+        print("Brains voted against buying. No order placed.")
+
+    # Log brain votes for traceability
+    with open("brain_votes.csv", "a", newline="") as f:
+        writer = csv.writer(f)
+        for brain, decision in zip(brains, votes):
+            writer.writerow([
+                timestamp,
+                symbol,
+                brain.name,
+                decision.vote,
+                decision.reason,
+            ])
 
     # Log everything for future learning
     with open("trade_log.csv", "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([
-            datetime.utcnow().isoformat(),
+            timestamp,
             symbol,
             price,
             "buy" if response else "skipped",
