@@ -29,4 +29,10 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas requests
+   ```
+
+2. Set up environment variables in a `.env` file:
+   - `ALPACA_API_KEY` and `ALPACA_SECRET_KEY`
+   - `NEWS_API_KEY` for fetching daily headlines
+
