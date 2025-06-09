@@ -5,12 +5,94 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
+import openai
 
 load_dotenv()
 
 API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+openai.api_key = OPENAI_API_KEY
+
+
+def analyst_brain(trade_logs: str) -> str:
+    """Analyze past trades for patterns and improvement opportunities."""
+    if not OPENAI_API_KEY:
+        return "Missing OpenAI credentials."
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are the trading analyst AI. Review trade logs and summarize"
+                " notable patterns, successes, and failures. Suggest areas of"
+                " improvement."
+            ),
+        },
+        {"role": "user", "content": trade_logs},
+    ]
+    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+    return response.choices[0].message.content.strip()
+
+
+def strategist_brain(market_context: str) -> str:
+    """Generate new trading strategies from market context."""
+    if not OPENAI_API_KEY:
+        return "Missing OpenAI credentials."
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are the lead strategist AI. Based on market data and"
+                " current performance, craft a concise trading strategy."
+            ),
+        },
+        {"role": "user", "content": market_context},
+    ]
+    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+    return response.choices[0].message.content.strip()
+
+
+def news_brain(headlines: str) -> str:
+    """Assess news headlines for sentiment and potential market impact."""
+    if not OPENAI_API_KEY:
+        return "Missing OpenAI credentials."
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You analyze financial news headlines and return a sentiment"
+                " score with notes on how they might affect the market."
+            ),
+        },
+        {"role": "user", "content": headlines},
+    ]
+    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+    return response.choices[0].message.content.strip()
+
+
+def risk_brain(portfolio_state: str) -> str:
+    """Evaluate the risk profile of the current portfolio."""
+    if not OPENAI_API_KEY:
+        return "Missing OpenAI credentials."
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are the risk management AI. Examine the portfolio and"
+                " recent trades to highlight major risks and position sizing"
+                " concerns."
+            ),
+        },
+        {"role": "user", "content": portfolio_state},
+    ]
+    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+    return response.choices[0].message.content.strip()
 
 def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
     """Trade any stock and log the decision, price, time, and logic used."""
