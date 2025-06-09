@@ -30,3 +30,12 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+```
+
+2. Run a historical simulation with your CSV data:
+   ```bash
+   python -c "from bot import simulate_historical_trades; simulate_historical_trades('prices.csv')"
+   ```
+   This prints the total trades processed, how many buys were simulated,
+   win rate percentage, average entry price and the highest price reached
+   after each buy.
