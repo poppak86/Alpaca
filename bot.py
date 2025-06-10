@@ -12,14 +12,30 @@ API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
 
-def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
-    """Trade any stock and log the decision, price, time, and logic used."""
+def trade_and_log(symbol: str, strategy_used: str = "test_strategy") -> None:
+    """Trade any stock and log the decision, price, time, and logic used.
+
+    Before submitting a trade, this function checks the account's current
+    intraday performance. If losses for the day exceed two percent of the
+    portfolio's value, trading halts for the remainder of the day.
+    """
     if not API_KEY or not SECRET_KEY:
         print("Missing Alpaca credentials.")
         return
 
     api = tradeapi.REST(API_KEY, SECRET_KEY, base_url=BASE_URL)
     print(f"Watching {symbol.upper()}...")
+
+    try:
+        account = api.get_account()
+        equity = float(account.equity)
+        last_equity = float(account.last_equity)
+        daily_change = (equity - last_equity) / last_equity
+        if daily_change <= -0.02:
+            print("Daily loss limit reached. No more trades today.")
+            return
+    except Exception as e:  # account fetch may fail in tests/sandboxes
+        print(f"Account check failed: {e}")
 
     try:
         latest_trade = api.get_latest_trade(symbol)
