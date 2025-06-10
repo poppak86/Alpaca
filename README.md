@@ -24,6 +24,7 @@ This bot will:
 - Trade any stock
 - Log detailed trade data to CSV
 - Begin self-analysis loop on trade outcomes
+- Label each trade with its strategy (e.g. `breakout`, `pullback`) for easier analysis
 
 ## 🛠 Setup
 
