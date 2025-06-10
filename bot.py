@@ -12,8 +12,13 @@ API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
 
-def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
-    """Trade any stock and log the decision, price, time, and logic used."""
+def trade_and_log(
+    symbol: str,
+    stop_loss: float,
+    take_profit: float,
+    strategy_used: str = "test_strategy",
+):
+    """Trade any stock and log the decision, price, time, logic used, and R:R."""
     if not API_KEY or not SECRET_KEY:
         print("Missing Alpaca credentials.")
         return
@@ -29,8 +34,18 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
         print(f"Failed to fetch price for {symbol}: {e}")
         return
 
+    risk = price - stop_loss
+    reward = take_profit - price
+    if risk <= 0 or reward <= 0:
+        print("Invalid stop loss or take profit levels.")
+        return
+    rr_ratio = reward / risk
+    print(f"Risk-reward ratio: {rr_ratio:.2f}")
+
     response = None
-    if price < 500:  # Placeholder logic
+    if rr_ratio < 1.5:
+        print("R:R ratio below 1.5. Trade skipped.")
+    elif price < 500:  # Placeholder logic
         try:
             response = api.submit_order(
                 symbol=symbol,
@@ -53,8 +68,10 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             symbol,
             price,
             "buy" if response else "skipped",
-            strategy_used
+            strategy_used,
+            rr_ratio
         ])
 
 if __name__ == "__main__":
-    trade_and_log("AAPL", "price_under_500")
+    # Example usage with placeholder stop loss and take profit levels
+    trade_and_log("AAPL", stop_loss=480.0, take_profit=510.0, strategy_used="price_under_500")
