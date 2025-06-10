@@ -23,6 +23,7 @@ This bot will:
 - Connect to Alpaca Paper API
 - Trade any stock
 - Log detailed trade data to CSV
+- Define stop loss and take profit with ATR so no trade has open-ended risk
 - Begin self-analysis loop on trade outcomes
 
 ## 🛠 Setup
