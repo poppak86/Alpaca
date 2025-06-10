@@ -22,6 +22,7 @@ This bot will:
 
 - Connect to Alpaca Paper API
 - Trade any stock
+- Only trade when the 14-day ATR is above a set threshold
 - Log detailed trade data to CSV
 - Begin self-analysis loop on trade outcomes
 
