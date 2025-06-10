@@ -29,4 +29,8 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+   pip install alpaca_trade_api python-dotenv pandas requests beautifulsoup4
+```
+2. Set additional environment variables for risk checks:
+   - `EARNINGS_API_KEY` for earnings calendar access
+   - `NEWS_API_KEY` for news sentiment analysis
