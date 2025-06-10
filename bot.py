@@ -12,8 +12,8 @@ API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
 
-def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
-    """Trade any stock and log the decision, price, time, and logic used."""
+def trade_and_log(symbol: str, strategy_used: str = "test_strategy", label: str = "general"):
+    """Trade any stock and log the decision, price, time, strategy, and label."""
     if not API_KEY or not SECRET_KEY:
         print("Missing Alpaca credentials.")
         return
@@ -53,8 +53,9 @@ def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
             symbol,
             price,
             "buy" if response else "skipped",
-            strategy_used
+            strategy_used,
+            label
         ])
 
 if __name__ == "__main__":
-    trade_and_log("AAPL", "price_under_500")
+    trade_and_log("AAPL", "price_under_500", "breakout")
