@@ -28,5 +28,10 @@ This bot will:
 ## 🛠 Setup
 
 1. Install dependencies:
-   ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+    ```bash
+    pip install alpaca_trade_api python-dotenv pandas requests
+    ```
+
+2. Set environment variables (e.g. using a `.env` file):
+    - `ALPACA_API_KEY` and `ALPACA_SECRET_KEY`
+    - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` for Telegram alerts
