@@ -29,4 +29,15 @@ This bot will:
 
 1. Install dependencies:
    ```bash
-   pip install alpaca_trade_api python-dotenv pandas
+    pip install alpaca_trade_api python-dotenv pandas \
+        python-telegram-bot==13.7 openai
+   ```
+2. Set environment variables `TELEGRAM_BOT_TOKEN` and `OPENAI_API_KEY`.
+
+## 📱 Telegram Bot
+
+Run `python telegram_bot.py` to start a Telegram bot that:
+
+- Replies to `/lasttrade` with the last entry in `trade_log.csv`.
+- Replies to `/summary` using `send_daily_summary()`.
+- Sends any other message to OpenAI and returns the response.
