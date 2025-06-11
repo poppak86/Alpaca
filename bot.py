@@ -12,6 +12,11 @@ API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
 BASE_URL = "https://paper-api.alpaca.markets"
 
+# Additional credentials loaded from the .env file
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 def trade_and_log(symbol: str, strategy_used: str = "test_strategy"):
     """Trade any stock and log the decision, price, time, and logic used."""
     if not API_KEY or not SECRET_KEY:

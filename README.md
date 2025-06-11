@@ -30,3 +30,14 @@ This bot will:
 1. Install dependencies:
    ```bash
    pip install alpaca_trade_api python-dotenv pandas
+
+```
+
+2. Create a `.env` file with your API keys:
+```env
+ALPACA_API_KEY=your_alpaca_key
+ALPACA_SECRET_KEY=your_alpaca_secret
+TELEGRAM_TOKEN=your_telegram_token
+TELEGRAM_CHAT_ID=your_chat_id
+OPENAI_API_KEY=your_openai_key
+```
